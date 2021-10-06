@@ -134,11 +134,11 @@ describe("GET /users", function () {
           isAdmin: false,
         },
         {
-          username: "u3",
-          firstName: "U3F",
-          lastName: "U3L",
-          email: "user3@user.com",
-          isAdmin: false,
+          username: "admin1",
+          firstName: "AD1F",
+          lastName: "AD1L",
+          email: "AD1@admin.com",
+          isAdmin: true,
         },
       ],
     });
