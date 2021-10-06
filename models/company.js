@@ -3,7 +3,7 @@
 const { query } = require("express");
 const db = require("../db");
 const { BadRequestError, NotFoundError } = require("../expressError");
-const { sqlForPartialUpdate, sqlForFiltering } = require("../helpers/sql");
+const { sqlForPartialUpdate} = require("../helpers/sql");
 
 /** Related functions for companies. */
 
@@ -60,7 +60,7 @@ class Company {
     // pass those in to query  with filter based on what those equal
     // create separate function call sqlForFiltering
 
-    const { filterCols, values } = sqlForFiltering(
+    const { filterCols, values } = Company.sqlForFiltering(
       filters,
       {
         minEmployees: "num_employees",
@@ -93,6 +93,66 @@ class Company {
     }
     return companiesRes.rows;
   }
+
+  /** Accepts two objects: dataToFilter k/v pairs if data to filter on
+   * jsToSql k/v pairs of converting JS to SQL syntax needed for query
+   * Returns an object with filterCols and values. 
+   * filterCols is a string of column names separated by AND. 
+   * Values are the correspondingvalues upon which to filter.
+
+   * EXAMPLE {name: 'C1', minEmployees: 0, maxEmployees: 2}
+   *    RETURN: {filterCols: "name"=$1 AND "num_employees">=$2 AND "num_employees" <= $3,
+   *             values: ['C1', 0, 2]} 
+  */
+
+  static sqlForFiltering(dataToFilter, jsToSql) {
+    //if key is name, add % to value
+    const keys = Object.keys(dataToFilter);
+    if (dataToFilter.name !== undefined) {
+      dataToFilter.name = `%${dataToFilter.name}%`;
+    }
+
+    const operators = {
+      name: " ILIKE ",
+      minEmployees: ">=",
+      maxEmployees: "<="
+    };
+
+
+    if (keys.length === 0) {
+      return {
+        filterCols: "",
+        values: [],
+      };
+    };
+
+    if (dataToFilter.minEmployees > dataToFilter.maxEmployees) {
+      throw new BadRequestError("Min cannot be greater than max employees")
+    }
+
+    // need to return a big string for each piece
+    // for each key, make a string that has the logical operator
+
+    // gives back an array of sql for where statement name: a_name => ["name" = 'a_name']
+    const cols = keys.map(function (colName, idx) {
+      //if invalid filtering parameters, throw error
+      if (operators[colName] === undefined) {
+        throw new BadRequestError("Filtering parameters not accepted")
+      }
+
+      return `"${jsToSql[colName] || colName}"${operators[colName]}$${idx + 1}`
+    });
+
+    return {
+      filterCols: cols.join(" AND "),
+      values: Object.values(dataToFilter),
+    };
+  }
+
+
+
+
+
 
 
 
@@ -169,7 +229,7 @@ class Company {
            RETURNING handle`,
       [handle]);
     const company = result.rows[0];
-
+      console.log('company in remove fxn', company);
     if (!company) throw new NotFoundError(`No company: ${handle}`);
   }
 }
