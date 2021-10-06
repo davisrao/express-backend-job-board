@@ -101,6 +101,20 @@ describe("findAll", function () {
     ]);
   });
 
+  test("works: partial filters on name 1", async function () {
+    let filters = { name: "1" }
+    let companies = await Company.findAll(filters);
+    expect(companies).toEqual([
+      {
+        handle: "c1",
+        name: "C1",
+        description: "Desc1",
+        numEmployees: 1,
+        logoUrl: "http://c1.img",
+      },
+    ]);
+  });
+
   test("works: filters on minEmployees 2", async function () {
     let filters = { minEmployees: 2 }
     let companies = await Company.findAll(filters);
@@ -122,7 +136,7 @@ describe("findAll", function () {
     ]);
   });
   test("works: filters on minEmployees 1, maxEmployees 2", async function () {
-    let filters = { minEmployees: 1, maxEmployees: 2 }
+    let filters = { minEmployees: 1, maxEmployees: 2 };
     let companies = await Company.findAll(filters);
     expect(companies).toEqual([
       {
@@ -139,6 +153,35 @@ describe("findAll", function () {
         numEmployees: 2,
         logoUrl: "http://c2.img",
       },
+      
+    ]);
+  });
+
+  test("works: filters on partial name match - C", async function () {
+    let filters = { name: 'C' };
+    let companies = await Company.findAll(filters);
+    expect(companies).toEqual([
+      {
+        handle: "c1",
+        name: "C1",
+        description: "Desc1",
+        numEmployees: 1,
+        logoUrl: "http://c1.img",
+      },
+      {
+        handle: "c2",
+        name: "C2",
+        description: "Desc2",
+        numEmployees: 2,
+        logoUrl: "http://c2.img",
+      },
+      {
+        handle: "c3",
+        name: "C3",
+        description: "Desc3",
+        numEmployees: 3,
+        logoUrl: "http://c3.img",
+      }
     ]);
   });
 
@@ -147,7 +190,8 @@ describe("findAll", function () {
     try {
       let companies = await Company.findAll(filters);
     } catch (err) {
-      expect(companies).toEqual(400);
+      console.log(err);
+      expect(err.status).toEqual(400);
     };
   });
 
@@ -156,12 +200,13 @@ describe("findAll", function () {
     try {
       let companies = await Company.findAll(filters);
     } catch (err) {
-      expect(companies).toEqual(400);
+      console.log('non-existent', err);
+      expect(err.status).toEqual(400);
     };
   });
 });
 
-/************************************** get */
+// /************************************** get */
 
 describe("get", function () {
   test("works", async function () {

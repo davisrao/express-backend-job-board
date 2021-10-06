@@ -1,5 +1,6 @@
 "use strict";
 
+const { query } = require("express");
 const db = require("../db");
 const { BadRequestError, NotFoundError } = require("../expressError");
 const { sqlForPartialUpdate, sqlForFiltering } = require("../helpers/sql");
@@ -59,26 +60,37 @@ class Company {
     // pass those in to query  with filter based on what those equal
     // create separate function call sqlForFiltering
 
-
-    const { setCols, values } = sqlForFiltering(
+    const { filterCols, values } = sqlForFiltering(
       filters,
       {
         minEmployees: "num_employees",
         maxEmployees: "num_employees",
       });
-    console.log("setcols",setCols,"values",values);
-    const querySql =
-      `SELECT handle,
+
+    let companiesRes;
+    if (filterCols === "") {
+      const querySql = `SELECT handle,
+                         name,
+                         description,
+                         num_employees AS "numEmployees",
+                         logo_url AS "logoUrl"
+                  FROM companies
+                  ORDER BY name`
+      companiesRes = await db.query(querySql)
+    } else {
+      const querySql =
+        `SELECT handle,
             name,
             description,
-            num_employees AS 'numEmployees',
-            logo_url AS 'logoUrl'
+            num_employees AS "numEmployees",
+            logo_url AS "logoUrl"
         FROM companies
-        WHERE ${setCols}
+        WHERE ${filterCols}
         ORDER BY name`;
-      console.log(querySql);
-    const companiesRes = await db.query(querySql, values)
-
+      console.log('query is: ', querySql);
+      console.log('values are: ', values);
+      companiesRes = await db.query(querySql, values);
+    }
     return companiesRes.rows;
   }
 

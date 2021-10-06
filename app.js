@@ -12,7 +12,7 @@ const authRoutes = require("./routes/auth");
 const companiesRoutes = require("./routes/companies");
 const usersRoutes = require("./routes/users");
 
-const morgan = require("morgan");
+const morgan = require("morgan"); //middleware logger
 
 const app = express();
 
