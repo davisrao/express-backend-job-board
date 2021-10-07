@@ -14,7 +14,7 @@ beforeAll(commonBeforeAll);
 beforeEach(commonBeforeEach);
 afterEach(commonAfterEach);
 afterAll(commonAfterAll);
-console.log('IN THE TEST!!');
+// console.log('IN THE TEST!!');
 /************************************** create */
 
 describe("create", function () {
@@ -27,7 +27,7 @@ describe("create", function () {
   };
 
   test("works", async function () {
-    console.log('IN THE TEST!!', newCompany);
+    // console.log('IN THE TEST!!', newCompany);
     let company = await Company.create(newCompany);
     expect(company).toEqual(newCompany);
 
@@ -154,7 +154,7 @@ describe("findAll", function () {
         numEmployees: 2,
         logoUrl: "http://c2.img",
       },
-      
+
     ]);
   });
 
@@ -191,7 +191,7 @@ describe("findAll", function () {
     try {
       let companies = await Company.findAll(filters);
     } catch (err) {
-      console.log(err);
+      // console.log(err);
       expect(err.status).toEqual(400);
     };
   });
@@ -201,7 +201,7 @@ describe("findAll", function () {
     try {
       let companies = await Company.findAll(filters);
     } catch (err) {
-      console.log('non-existent', err);
+      // console.log('non-existent', err);
       expect(err.status).toEqual(400);
     };
   });

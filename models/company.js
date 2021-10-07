@@ -24,7 +24,7 @@ class Company {
            WHERE handle = $1`,
       [handle]);
 
-    console.log(handle, name, description, numEmployees, logoUrl);
+    // console.log(handle, name, description, numEmployees, logoUrl);
 
     if (duplicateCheck.rows[0])
       throw new BadRequestError(`Duplicate company: ${handle}`);
@@ -87,8 +87,8 @@ class Company {
         FROM companies
         WHERE ${filterCols}
         ORDER BY name`;
-      console.log('query is: ', querySql);
-      console.log('values are: ', values);
+      // console.log('query is: ', querySql);
+      // console.log('values are: ', values);
       companiesRes = await db.query(querySql, values);
     }
     return companiesRes.rows;

@@ -54,9 +54,7 @@ async function ensureIsAdmin(req, res, next) {
   try {
     if (!res.locals.user) throw new UnauthorizedError();
 
-    const user = await User.get(res.locals.user.username);
-
-    if (user.isAdmin === false) throw new UnauthorizedError("Access denied");
+    if (res.locals.user.isAdmin === false) throw new UnauthorizedError("Access denied");
 
     return next();
 
@@ -73,14 +71,19 @@ async function ensureIsAdmin(req, res, next) {
 async function ensureUserAccess(req, res, next) {
 
   try {
-    if (!res.locals.user) throw new UnauthorizedError();
+
 
     //checks if username from url is in database
-    const searchUser = await User.get(req.params.username);
-    if (searchUser === undefined) throw new NotFoundError();
 
-    const user = res.locals.user;
-    if (user.isAdmin === false && searchUser.username !== user.username) throw new UnauthorizedError("Access denied");
+
+    const user = res.locals?.user;
+
+    if (!user) throw new UnauthorizedError();
+
+    //throw error if user is not admin && usernames do not match
+    //
+
+    if (user.isAdmin === false && req.params.username !== user.username) throw new UnauthorizedError("Access denied");
 
     return next();
 

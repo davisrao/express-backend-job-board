@@ -112,6 +112,13 @@ describe("findAll", function () {
     const users = await User.findAll();
     expect(users).toEqual([
       {
+        username: "admin1",
+        firstName: "AD1F",
+        lastName: "AD2L",
+        email: "AD2@email.com",
+        isAdmin: true,
+      },
+      {
         username: "u1",
         firstName: "U1F",
         lastName: "U1L",
