@@ -3,7 +3,7 @@
 const { query } = require("express");
 const db = require("../db");
 const { BadRequestError, NotFoundError } = require("../expressError");
-const { sqlForPartialUpdate} = require("../helpers/sql");
+const { sqlForPartialUpdate } = require("../helpers/sql");
 
 /** Related functions for companies. */
 
@@ -24,18 +24,18 @@ class Company {
            WHERE handle = $1`,
       [handle]);
 
+    console.log(handle, name, description, numEmployees, logoUrl);
+
     if (duplicateCheck.rows[0])
       throw new BadRequestError(`Duplicate company: ${handle}`);
-
     const result = await db.query(
-      `INSERT INTO companies(
-          handle,
+      `INSERT INTO companies 
+          (handle,
           name,
           description,
           num_employees,
           logo_url)
-           VALUES
-             ($1, $2, $3, $4, $5)
+        VALUES ($1, $2, $3, $4, $5)
            RETURNING handle, name, description, num_employees AS "numEmployees", logo_url AS "logoUrl"`,
       [
         handle,
@@ -229,7 +229,7 @@ class Company {
            RETURNING handle`,
       [handle]);
     const company = result.rows[0];
-      console.log('company in remove fxn', company);
+    console.log('company in remove fxn', company);
     if (!company) throw new NotFoundError(`No company: ${handle}`);
   }
 }

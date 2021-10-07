@@ -4,7 +4,7 @@
 
 const jwt = require("jsonwebtoken");
 const { SECRET_KEY } = require("../config");
-const { UnauthorizedError } = require("../expressError");
+const { UnauthorizedError, NotFoundError } = require("../expressError");
 const User = require('../models/user');
 
 
@@ -48,18 +48,42 @@ function ensureLoggedIn(req, res, next) {
  * If not, raises Unauthorized.
  */
 
- function ensureIsAdmin(req, res, next) {
+async function ensureIsAdmin(req, res, next) {
 
   console.log("res.locals.user", res.locals.user);
-   try {
+  try {
     if (!res.locals.user) throw new UnauthorizedError();
 
-    const user = User.get(res.locals.user.username);
-    
-    if (user.is_admin === false) throw new UnauthorizedError("Access denied");
+    const user = await User.get(res.locals.user.username);
+
+    if (user.isAdmin === false) throw new UnauthorizedError("Access denied");
 
     return next();
-    
+
+  } catch (err) {
+    return next(err);
+  }
+}
+
+/** Middleware to use when user must be admin OR user in params.
+ *
+ * If not, raises Unauthorized.
+ */
+
+async function ensureUserAccess(req, res, next) {
+
+  try {
+    if (!res.locals.user) throw new UnauthorizedError();
+
+    //checks if username from url is in database
+    const searchUser = await User.get(req.params.username);
+    if (searchUser === undefined) throw new NotFoundError();
+
+    const user = res.locals.user;
+    if (user.isAdmin === false && searchUser.username !== user.username) throw new UnauthorizedError("Access denied");
+
+    return next();
+
   } catch (err) {
     return next(err);
   }
@@ -71,5 +95,6 @@ function ensureLoggedIn(req, res, next) {
 module.exports = {
   authenticateJWT,
   ensureLoggedIn,
-  ensureIsAdmin
+  ensureIsAdmin,
+  ensureUserAccess
 };
