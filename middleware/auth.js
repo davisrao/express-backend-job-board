@@ -50,7 +50,6 @@ function ensureLoggedIn(req, res, next) {
 
 async function ensureIsAdmin(req, res, next) {
 
-  console.log("res.locals.user", res.locals.user);
   try {
     if (!res.locals.user) throw new UnauthorizedError();
 
@@ -63,41 +62,37 @@ async function ensureIsAdmin(req, res, next) {
   }
 }
 
+//is User admin --> definitely grant access
+//if not
+  //if user is the params user
+
 /** Middleware to use when user must be admin OR user in params.
  *
  * If not, raises Unauthorized.
  */
 
-async function ensureUserAccess(req, res, next) {
+async function ensureParamsUser(req, res, next) {
 
   try {
-
-
-    //checks if username from url is in database
-
-
     const user = res.locals?.user;
-
-    if (!user) throw new UnauthorizedError();
-
-    //throw error if user is not admin && usernames do not match
-    //
-
+    if (user === undefined) throw new UnauthorizedError(); //?TODO: can check after finishing user route with auth
     if (user.isAdmin === false && req.params.username !== user.username) throw new UnauthorizedError("Access denied");
-
+    
     return next();
-
+    
   } catch (err) {
     return next(err);
   }
 }
 
 
+// 
+// if (!user) throw new UnauthorizedError();
 
 
 module.exports = {
   authenticateJWT,
   ensureLoggedIn,
   ensureIsAdmin,
-  ensureUserAccess
+  ensureParamsUser
 };

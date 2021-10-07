@@ -5,7 +5,7 @@ const { UnauthorizedError } = require("../expressError");
 const {
   authenticateJWT,
   ensureLoggedIn,
-  ensureUserAccess,
+  ensureParamsUser,
 } = require("./auth");
 
 
@@ -79,7 +79,7 @@ describe("ensureLoggedIn", function () {
 });
 
 
-describe("ensureUserAccess", function () {
+describe("ensureParamsUser", function () {
   test("works for matching user", function () {
     expect.assertions(1);
     const req = { params: { username: "u1" } };
@@ -88,8 +88,9 @@ describe("ensureUserAccess", function () {
       expect(err).toBeFalsy();
     };
     console.log('setup works')
-    ensureUserAccess(req, res, next);
+    ensureParamsUser(req, res, next);
   });
+  
   test("works for admin", function () {
     expect.assertions(1);
     const req = { params: { username: "u1" } };
@@ -97,7 +98,7 @@ describe("ensureUserAccess", function () {
     const next = function (err) {
       expect(err).toBeFalsy();
     };
-    ensureUserAccess(req, res, next);
+    ensureParamsUser(req, res, next);
   });
 
   test("unauth if username does not match login", function () {
@@ -107,17 +108,17 @@ describe("ensureUserAccess", function () {
     const next = function (err) {
       expect(err instanceof UnauthorizedError).toBeTruthy();
     };
-    ensureUserAccess(req, res, next);
+    ensureParamsUser(req, res, next);
   });
 
   test("unauth if no user logged in", function () {
     expect.assertions(1);
-    const req = { params: { username: "u1" } };
+    const req = { params: { username: "u1", isAdmin: false } };
     const res = {};
     const next = function (err) {
       expect(err instanceof UnauthorizedError).toBeTruthy();
     };
-    ensureUserAccess(req, res, next);
+    ensureParamsUser(req, res, next);
   });
 
 

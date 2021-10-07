@@ -5,7 +5,7 @@
 const jsonschema = require("jsonschema");
 
 const express = require("express");
-const { ensureUserAccess, ensureIsAdmin } = require("../middleware/auth");
+const { ensureParamsUser, ensureIsAdmin, ensureLoggedIn } = require("../middleware/auth");
 const { BadRequestError } = require("../expressError");
 const User = require("../models/user");
 const { createToken } = require("../helpers/tokens");
@@ -60,7 +60,7 @@ router.get("/", ensureIsAdmin, async function (req, res, next) {
  * Authorization required: User or Admin
  **/
 
-router.get("/:username", ensureUserAccess, async function (req, res, next) {
+router.get("/:username", ensureLoggedIn, ensureParamsUser, async function (req, res, next) {
   const user = await User.get(req.params.username);
   return res.json({ user });
 });
@@ -76,7 +76,7 @@ router.get("/:username", ensureUserAccess, async function (req, res, next) {
  * Authorization required: User or Admin
  **/
 
-router.patch("/:username", ensureUserAccess, async function (req, res, next) {
+router.patch("/:username", ensureLoggedIn, ensureParamsUser, async function (req, res, next) {
   const validator = jsonschema.validate(req.body, userUpdateSchema);
   if (!validator.valid) {
     const errs = validator.errors.map(e => e.stack);
@@ -93,7 +93,7 @@ router.patch("/:username", ensureUserAccess, async function (req, res, next) {
  * Authorization required: User or Admin
  **/
 
-router.delete("/:username", ensureUserAccess, async function (req, res, next) {
+router.delete("/:username", ensureLoggedIn, ensureParamsUser, async function (req, res, next) {
   await User.remove(req.params.username);
   return res.json({ deleted: req.params.username });
 });
