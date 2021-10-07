@@ -81,130 +81,120 @@ class Job {
   */
 
   static sqlForFiltering(dataToFilter, jsToSql) {
-  //if key is name, add % to value
-  const keys = Object.keys(dataToFilter);
-  if (dataToFilter.title !== undefined) {
-    dataToFilter.title = `%${dataToFilter.title}%`;
-  }
-
-  if (dataToFilter.hasEquity === false || dataToFilter.hasEquity === undefined) {
-    delete dataToFilter.hasEquity;
-  } else {
-    dataToFilter.hasEquity = 0;
-  }
-
-  const operators = {
-    title: " ILIKE ",
-    minSalary: ">=",
-    hasEquity: ">" //??
-  };
-
-  if (keys.length === 0) {
-    return {
-      filterCols: "",
-      values: [],
-    };
-  };
-
-  // gives back an array of sql for where statement name: a_name => ["name" = 'a_name']
-  const cols = keys.map(function (colName, idx) {
-    //if invalid filtering parameters, throw error
-    if (operators[colName] === undefined) {
-      throw new BadRequestError("Filtering parameters not accepted")
+    //if key is name, add % to value
+    const keys = Object.keys(dataToFilter);
+    if (dataToFilter.title !== undefined) {
+      dataToFilter.title = `%${dataToFilter.title}%`;
     }
 
-    return `"${jsToSql[colName] || colName}"${operators[colName]}$${idx + 1}` //update when called
-  });
+    if (dataToFilter.hasEquity === false || dataToFilter.hasEquity === undefined) {
+      delete dataToFilter.hasEquity;
+    } else {
+      dataToFilter.hasEquity = 0;
+    }
 
-  return {
-    filterCols: cols.join(" AND "),
-    values: Object.values(dataToFilter),
-  };
-}
+    const operators = {
+      title: " ILIKE ",
+      minSalary: ">=",
+      hasEquity: ">" //??
+    };
+
+    if (keys.length === 0) {
+      return {
+        filterCols: "",
+        values: [],
+      };
+    };
+
+    // gives back an array of sql for where statement name: a_name => ["name" = 'a_name']
+    const cols = keys.map(function (colName, idx) {
+      //if invalid filtering parameters, throw error
+      if (operators[colName] === undefined) {
+        throw new BadRequestError("Filtering parameters not accepted")
+      }
+
+      return `"${jsToSql[colName] || colName}"${operators[colName]}$${idx + 1}` //update when called
+    });
+
+    return {
+      filterCols: cols.join(" AND "),
+      values: Object.values(dataToFilter),
+    };
+  }
 
 
-
-
-
-
-
-
-  /** Given a company handle, return data about company.
+  /** Given a job id return data on job.
    *
-   * Returns { handle, name, description, numEmployees, logoUrl, jobs }
-   *   where jobs is [{ id, title, salary, equity, companyHandle }, ...]
+   * Returns { id, title, salary, equity, companyHandle }
    *
    * Throws NotFoundError if not found.
    **/
 
-  static async get(handle) {
-  const companyRes = await db.query(
-    `SELECT handle,
-                  name,
-                  description,
-                  num_employees AS "numEmployees",
-                  logo_url AS "logoUrl"
-             FROM companies
-             WHERE handle = $1`,
-    [handle]);
+  static async get(id) {
 
-  const company = companyRes.rows[0];
+    const jobRes = await db.query(
+                        `SELECT 
+                          id,
+                          title,
+                          salary, 
+                          equity, 
+                          company_handle
+                        FROM jobs
+                        WHERE id = $1
+                        ORDER BY id`,
+      [id]);
 
-  if (!company) throw new NotFoundError(`No company: ${handle}`);
+    const job = jobRes.rows[0];
+    if (!job) throw new NotFoundError(`No job: ${id}`);
 
-  return company;
-}
+    return job;
+  }
 
-  /** Update company data with `data`.
-   *
+  /** Update job data with `data`.
+  *
    * This is a "partial update" --- it's fine if data doesn't contain all the
    * fields; this only changes provided ones.
    *
-   * Data can include: {name: 'new name', description, numEmployees, logoUrl}
+   * Data can include: {title: 'new title', salary, equity}
    *
    * Returns {handle, name, description, numEmployees, logoUrl}
    *
    * Throws NotFoundError if not found.
    */
 
-  static async update(handle, data) {
-  const { setCols, values } = sqlForPartialUpdate(
-    data,
-    {
-      numEmployees: "num_employees",
-      logoUrl: "logo_url",
-    });
-  const handleVarIdx = "$" + (values.length + 1);
+  static async update(id, data) {
 
-  const querySql = `
-        UPDATE companies
+    const { setCols, values } = sqlForPartialUpdate(data,{});
+    const idVarIdx = "$" + (values.length + 1);
+
+    const querySql = `
+        UPDATE jobs
         SET ${setCols}
-          WHERE handle = ${handleVarIdx}
-          RETURNING handle, name, description, num_employees AS "numEmployees", logo_url AS "logoUrl"`;
-  const result = await db.query(querySql, [...values, handle]);
-  const company = result.rows[0];
+          WHERE id = ${idVarIdx}
+          RETURNING id, title, salary, equity, company_handle`;
+    const result = await db.query(querySql, [...values, id]);
+    const job = result.rows[0];
 
-  if (!company) throw new NotFoundError(`No company: ${handle}`);
+    if (!job) throw new NotFoundError(`No job: ${id}`);
 
-  return company;
-}
+    return job;
+  }
 
-  /** Delete given company from database; returns undefined.
+  /** Delete given job from database; returns undefined.
    *
    * Throws NotFoundError if company not found.
    **/
 
-  static async remove(handle) {
-  const result = await db.query(
-    `DELETE
-             FROM companies
-             WHERE handle = $1
-             RETURNING handle`,
-    [handle]);
-  const company = result.rows[0];
-  console.log('company in remove fxn', company);
-  if (!company) throw new NotFoundError(`No company: ${handle}`);
-}
+  static async remove(id) {
+    const result = await db.query(
+      `DELETE
+             FROM jobs
+             WHERE id = $1
+             RETURNING id`,
+      [id]);
+    const job = result.rows[0];
+    if (!job) throw new NotFoundError(`No job: ${id}`);
+  }
 }
 
 
