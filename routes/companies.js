@@ -111,7 +111,7 @@ router.patch("/:handle", ensureIsAdmin, async function (req, res, next) {
  */
 
 router.delete("/:handle", ensureIsAdmin, async function (req, res, next) {
-  console.log("input for delete",req.params.handle)
+  // console.log("input for delete",req.params.handle)
   await Company.remove(req.params.handle);
   return res.json({ deleted: req.params.handle });
 });

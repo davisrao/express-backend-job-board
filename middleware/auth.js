@@ -53,7 +53,7 @@ async function ensureIsAdmin(req, res, next) {
   try {
     if (!res.locals.user) throw new UnauthorizedError();
 
-    if (res.locals.user.isAdmin === false) throw new UnauthorizedError("Access denied");
+    if (res.locals.user.isAdmin === false) throw new UnauthorizedError();
 
     return next();
 
@@ -61,11 +61,6 @@ async function ensureIsAdmin(req, res, next) {
     return next(err);
   }
 }
-
-//is User admin --> definitely grant access
-//if not
-  //if user is the params user
-
 /** Middleware to use when user must be admin OR user in params.
  *
  * If not, raises Unauthorized.
@@ -74,7 +69,7 @@ async function ensureIsAdmin(req, res, next) {
 async function ensureParamsUser(req, res, next) {
 
   try {
-    const user = res.locals?.user;
+    const user = res.locals?.user; 
     if (user === undefined) throw new UnauthorizedError(); //?TODO: can check after finishing user route with auth
     if (user.isAdmin === false && req.params.username !== user.username) throw new UnauthorizedError("Access denied");
     
@@ -84,10 +79,6 @@ async function ensureParamsUser(req, res, next) {
     return next(err);
   }
 }
-
-
-// 
-// if (!user) throw new UnauthorizedError();
 
 
 module.exports = {

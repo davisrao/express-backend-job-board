@@ -204,8 +204,6 @@ describe("PATCH /companies/:handle", function () {
       expect(resp.statusCode).toEqual(401);
   });
 
-
-
   test("unauth for anon", async function () {
     const resp = await request(app)
       .patch(`/companies/c1`)

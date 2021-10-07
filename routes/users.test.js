@@ -297,7 +297,7 @@ describe("PATCH /users/:username", () => {
     expect(resp.statusCode).toEqual(401);
   });
 
-  test("not found if no such user", async function () {
+  test("unauth if no such user", async function () {
     const resp = await request(app)
       .patch(`/users/nope`)
       .send({
@@ -375,7 +375,7 @@ describe("DELETE /users/:username", function () {
     expect(resp.statusCode).toEqual(401);
   });
 
-  test("not found if user missing", async function () {
+  test("unauth if user missing", async function () {
     const resp = await request(app)
       .delete(`/users/nope`)
       .set("authorization", `Bearer ${u1Token}`);
