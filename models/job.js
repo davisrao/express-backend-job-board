@@ -39,16 +39,21 @@ class Job {
     // take in the filters and convert to SQL like the partial update fxn
     // pass those in to query  with filter based on what those equal
     // create separate function call sqlForFiltering
-
+    console.log('filters in findAll',filters)
     const { filterCols, values } = Job.sqlForFiltering(
       filters,
       {
-        minSalary: "salary",
+        // minSalary: "salary",
         hasEquity: "equity",
       });
 
     let jobsResp;
     let whereClause;
+    
+    console.log('cols',filterCols)
+    console.log('vals',values)
+
+
 
     if (filterCols === "") {
       whereClause = "ORDER BY id";
@@ -95,7 +100,7 @@ class Job {
 
     const operators = {
       title: " ILIKE ",
-      minSalary: ">=",
+      salary: ">=",
       hasEquity: ">" //??
     };
 

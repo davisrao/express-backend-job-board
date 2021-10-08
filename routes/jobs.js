@@ -50,21 +50,26 @@ router.post("/", ensureIsAdmin, async function (req, res, next) {
 router.get("/", async function (req, res, next) {
     console.log('in get route');
     const filters = req.query;
-    console.log(filters);
-    if (filters.salary !== undefined) {
-        filters.salary = Number(filters.salary);
+    if (filters.minSalary !== undefined) {
+        filters.salary = Number(filters.minSalary);
+        delete filters.minSalary;
     };
     
     if (filters.equity !== undefined) {
         filters.equity = Number(filters.equity);
     };
     
+    console.log("sal", filters.salary);
+    console.log("in get route filters pre vaildation",filters);
+
     const validator = jsonschema.validate(filters, jobFilterOrUpdateSchema);
+    console.log('val',validator.valid);
     if (!validator.valid) {
         const errs = validator.errors.map(e => e.stack);
         throw new BadRequestError(errs);
     };
     
+    console.log('filters in route',filters)
     const jobs = await Job.findAll(filters);
     console.log('jobs is: ', jobs);
     return res.json({ jobs });

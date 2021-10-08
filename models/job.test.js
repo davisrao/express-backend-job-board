@@ -127,7 +127,7 @@ describe("findAll", function () {
     });
 
     test("works: filters on minSalary = 300000, hasEquity = true", async function () {
-        let filters = { minSalary: 300000, hasEquity: true };
+        let filters = { salary: 300000, hasEquity: true };
         let jobs = await Job.findAll(filters);
         expect(jobs).toEqual([
             {

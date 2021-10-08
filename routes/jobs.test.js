@@ -42,7 +42,7 @@ describe("POST /jobs", function () {
         salary: 400000,
         equity: '0.004',
         company_handle: 'c1',
-    },
+      },
     });
   });
 
@@ -91,58 +91,54 @@ describe("GET /jobs", function () {
             salary: 100000,
             equity: '0.001',
             company_handle: 'c1',
-        },
-        {
+          },
+          {
             id: expect.any(Number),
             title: 'jobtitle2',
             salary: 200000,
             equity: '0.002',
             company_handle: 'c2',
-        },
-        {
+          },
+          {
             id: expect.any(Number),
             title: 'jobtitle3',
             salary: 300000,
             equity: '0.003',
             company_handle: 'c3',
-        },
+          },
         ],
     });
   });
 
   ////////////////////////////// CONTINUE HERE /////////////////////////////////
-//   test("ok for anon - filters in query string", async function () {
-//     const resp = await request(app).get("/jobs?name=C2&minEmployees=2");
-//     expect(resp.body).toEqual({
-//       jobs:
-//         [
-//           {
-//             handle: "c2",
-//             name: "C2",
-//             description: "Desc2",
-//             numEmployees: 2,
-//             logoUrl: "http://c2.img",
-//           }
-//         ],
-//     });
-//   });
+  test("ok for anon - filters in query string", async function () {
+    const resp = await request(app).get("/jobs?minSalary=100001");
+    expect(resp.body).toEqual({
+      jobs:
+        [
+          {
+            id: expect.any(Number),
+            title: 'jobtitle2',
+            salary: 200000,
+            equity: '0.002',
+            company_handle: 'c2',
+          },
+          {
+            id: expect.any(Number),
+            title: 'jobtitle3',
+            salary: 300000,
+            equity: '0.003',
+            company_handle: 'c3',
+          }
+        ],
+    });
+  });
 
-//   test("ok for anon - error: invalid filters in query string", async function () {
-//     const resp = await request(app).get("/jobs?handle=c2");
-//     expect(resp.status).toEqual(400);
-//   });
-
-//   test("fails: test next() handler", async function () {
-//     // there's no normal failure event which will cause this route to fail ---
-//     // thus making it hard to test that the error-handler works with it. This
-//     // should cause an error, all right :)
-//     await db.query("DROP TABLE jobs CASCADE");
-//     const resp = await request(app)
-//       .get("/jobs")
-//       .set("authorization", `Bearer ${u1Token}`);
-//     expect(resp.statusCode).toEqual(500);
-//   });
-// });
+  test("ok for anon - error: invalid filters in query string", async function () {
+    const resp = await request(app).get("/jobs?handle=c2");
+    expect(resp.status).toEqual(400);
+  });
+});
 
 // /************************************** GET /jobs/:handle */
 
@@ -177,7 +173,7 @@ describe("GET /jobs", function () {
 //     const resp = await request(app).get(`/jobs/nope`);
 //     expect(resp.statusCode).toEqual(404);
 //   });
-});
+// });
 
 // /************************************** PATCH /jobs/:handle */
 
