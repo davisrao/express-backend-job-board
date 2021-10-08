@@ -26,7 +26,6 @@ describe("create", function () {
     };
 
     test("works", async function () {
-        console.log("RESULTS",idResults)
         let job = await Job.create(newJob);
         // console.log('job is: ', job);
         expect(job).toEqual(            
@@ -42,7 +41,6 @@ describe("create", function () {
             `SELECT id, title, salary, equity, company_handle
            FROM jobs
            WHERE title = 'newJob'`);
-           console.log(result.rows);
         expect(result.rows).toEqual([
             {
                 id: expect.any(Number),
@@ -210,68 +208,70 @@ describe("get", function () {
             }]);
         });
 
-        // test("works: null fields", async function () {
-        //     const updateDataSetNulls = {
-        //         name: "New",
-        //         description: "New Description",
-        //         numEmployees: null,
-        //         logoUrl: null,
-        //     };
+        test("works: null fields", async function () {
+            const updateDataSetNulls = {
+                title: "New",
+                salary: null,
+                equity: null,
+            };
 
-        //     let company = await Company.update("c1", updateDataSetNulls);
-        //     expect(company).toEqual({
-        //         handle: "c1",
-        //         ...updateDataSetNulls,
-        //     });
+            let job = await Job.update(idResults[0].id, updateDataSetNulls);
+            expect(job).toEqual({
+                id: idResults[0].id,
+                title: "New",
+                salary: null,
+                equity: null,
+                company_handle: 'c1',
+            });
 
-        //     const result = await db.query(
-        //         `SELECT handle, name, description, num_employees, logo_url
-        //        FROM companies
-        //        WHERE handle = 'c1'`);
-        //     expect(result.rows).toEqual([{
-        //         handle: "c1",
-        //         name: "New",
-        //         description: "New Description",
-        //         num_employees: null,
-        //         logo_url: null,
-        //     }]);
-        // });
+            const result = await db.query(
+                `SELECT id, title, salary, equity, company_handle
+                FROM jobs
+                WHERE id = $1`,[idResults[0].id]);
+            expect(result.rows).toEqual([{
+                id: idResults[0].id,
+                title: "New",
+                salary: null,
+                equity: null,
+                company_handle: 'c1',
+            }]);
+        });
 
-        // test("not found if no such company", async function () {
-        //     try {
-        //         await Company.update("nope", updateData);
-        //         fail();
-        //     } catch (err) {
-        //         expect(err instanceof NotFoundError).toBeTruthy();
-        //     }
-        // });
+        test("not found if no such job", async function () {
+            try {
+                await Job.update(10000, updateData);
+                fail();
+            } catch (err) {
+                expect(err instanceof NotFoundError).toBeTruthy();
+            }
+        });
 
-        // test("bad request with no data", async function () {
-        //     try {
-        //         await Company.update("c1", {});
-        //         fail();
-        //     } catch (err) {
-        //         expect(err instanceof BadRequestError).toBeTruthy();
-        //     }
-        // });
+        test("bad request with no data", async function () {
+            try {
+                await Job.update(idResults[0].id, {});
+                fail();
+            } catch (err) {
+                expect(err instanceof BadRequestError).toBeTruthy();
+            }
+        });
     });
 
-    // /************************************** remove */
+    /************************************** remove */
 
-    // describe("remove", function () {
-    //     test("works", async function () {
-    //         await Company.remove("c1");
-    //         const res = await db.query(
-    //             "SELECT handle FROM companies WHERE handle='c1'");
-    //         expect(res.rows.length).toEqual(0);
-    //     });
+    describe("remove", function () {
+        test("works", async function () {
+            await Job.remove(idResults[0].id);
+            const res = await db.query(
+                "SELECT id FROM jobs WHERE id=$1",[idResults[0].id]);
+            expect(res.rows.length).toEqual(0);
+        });
 
-    //     test("not found if no such company", async function () {
-    //         try {
-    //             await Company.remove("nope");
-    //             fail();
-    //         } catch (err) {
-    //             expect(err instanceof NotFoundError).toBeTruthy();
-    //         }
-    //     });
-// });
+        test("not found if no such company", async function () {
+            try {
+                await Job.remove(10000);
+                fail();
+            } catch (err) {
+                expect(err instanceof NotFoundError).toBeTruthy();
+            }
+        });
+});

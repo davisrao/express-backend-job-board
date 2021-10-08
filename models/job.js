@@ -27,7 +27,6 @@ class Job {
     );
     let job = result.rows[0];
     //job.equity = Number(job.equity);
-    console.log('IN CREATE FUNCTION: ', job);
     return job;
   }
 
@@ -52,10 +51,11 @@ class Job {
     let whereClause;
 
     if (filterCols === "") {
-      whereClause = "";
+      whereClause = "ORDER BY id";
     } else {
-      whereClause = `WHERE ${filterCols}`;
+      whereClause = `WHERE ${filterCols} ORDER BY id`;
     }
+
     const querySql = `SELECT 
                           id,
                           title,
@@ -63,8 +63,8 @@ class Job {
                           equity, 
                           company_handle
                         FROM jobs
-                          ${whereClause}
-                          ORDER BY id`
+                          ${whereClause}`
+
     jobsResp = await db.query(querySql, values);
     return jobsResp.rows;
   }
